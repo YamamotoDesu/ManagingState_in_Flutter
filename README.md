@@ -630,3 +630,36 @@ class _TutorialWidgetState extends State<TutorialWidget> {
 ```
 
 
+## Understand Consumers
+
+
+lib/pages/tutorials_page.dart
+```dart
+
+class _TutorialsPageState extends State<TutorialsPage> {
+  @override
+  Widget build(BuildContext context) {
+    return Consumer<Pillar>(
+      builder: (_, pillar, __) => Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: <Widget>[
+          const Center(child: TutorialWidget()),
+          Padding(
+ ```
+
+
+lib/widgets/tutorial_widget.dart
+```dart
+
+class _TutorialWidgetState extends State<TutorialWidget> {
+  @override
+  Widget build(BuildContext context) {
+    return Consumer<Pillar>(
+      builder: (_, pillar, __) {
+        return Stack(
+          children: [
+            InkWell(
+              onTap: () {
+                pillar.increaseArticleCount();
+```
+
