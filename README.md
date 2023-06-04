@@ -601,3 +601,32 @@ class _TutorialWidgetState extends State<TutorialWidget> {
   }
 }
 ```
+
+## Use Context Methods
+
+lib/pages/tutorials_page.dart
+```dart
+
+class _TutorialsPageState extends State<TutorialsPage> {
+  @override
+  Widget build(BuildContext context) {
+    final pillar = context.watch<Pillar>();
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: <Widget>[
+```
+
+lib/widgets/tutorial_widget.dart
+```dart
+
+class _TutorialWidgetState extends State<TutorialWidget> {
+  @override
+  Widget build(BuildContext context) {
+    final pillar = context.watch<Pillar>();
+    return Stack(
+      children: [
+        InkWell(
+          onTap: () {
+```
+
+
