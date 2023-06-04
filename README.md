@@ -447,3 +447,157 @@ class _TutorialsPageState extends State<TutorialsPage> {
   }
 }
 ```
+
+## Use Provider
+
+lib/models/pillar.dart
+```dart
+import 'package:flutter/material.dart';
+
+class Pillar extends ChangeNotifier {
+  var _articleCount = 0;
+  int get articleCount => _articleCount;
+  var active = true;
+  final PillarType type;
+
+  Pillar({required this.type, int articleCount = 10}) {
+    _articleCount = articleCount;
+  } 
+
+  void increaseArticleCount({int by = 1}) {
+    _articleCount += by;
+    notifyListeners();
+  }
+}
+
+enum PillarType {
+  flutter('flutter.png', Colors.blue),
+  android('android.png', Colors.green),
+  ios('ios.png', Colors.orange);
+
+  final String imageName;
+  final Color backgroundColor;
+
+  const PillarType(this.imageName, this.backgroundColor);
+}
+```
+
+lib/main.dart
+```dart
+import 'package:flutter/material.dart';
+import 'pages/tutorials_page.dart';
+import 'models/pillar.dart';
+import 'package:provider/provider.dart';
+
+void main() {
+  runApp(const Application());
+}
+
+class Application extends StatefulWidget {
+  const Application({super.key});
+
+  @override
+  State<Application> createState() => _ApplicationState();
+}
+
+class _ApplicationState extends State<Application> {
+  final pillarData = Pillar(type: PillarType.flutter, articleCount: 115);
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Tutorial Tracker',
+      theme: ThemeData(primarySwatch: Colors.green),
+      home: Scaffold(
+        appBar: AppBar(
+          title: const Text('Tutorial Tracker'),
+        ),
+        body: ChangeNotifierProvider<Pillar>(
+          create: (context) => pillarData,
+          child: const TutorialsPage(),
+        ),
+      ),
+    );
+  }
+}
+```
+
+lib/pages/tutorials_page.dart
+```dart
+import 'package:flutter/material.dart';
+import '../widgets/tutorial_widget.dart';
+import 'package:provider/provider.dart';
+import '../models/pillar.dart';
+
+class TutorialsPage extends StatefulWidget {
+  const TutorialsPage({
+    super.key,
+  });
+
+  @override
+  State<TutorialsPage> createState() => _TutorialsPageState();
+}
+
+class _TutorialsPageState extends State<TutorialsPage> {
+  @override
+  Widget build(BuildContext context) {
+    final pillar = Provider.of<Pillar>(context);
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: <Widget>[
+        const Center(
+          child: TutorialWidget()),
+        Padding(
+          padding: const EdgeInsets.only(top: 24.0),
+          child: Text(
+            'Total Tutorials: ${pillar.articleCount}',
+            style: const TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
+          ),
+        )
+      ],
+    );
+  }
+}
+```
+
+lib/widgets/tutorial_widget.dart
+```dart
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../models/pillar.dart';
+
+class TutorialWidget extends StatefulWidget {
+
+  const TutorialWidget({
+    super.key,
+  });
+
+  @override
+  State<TutorialWidget> createState() => _TutorialWidgetState();
+}
+
+class _TutorialWidgetState extends State<TutorialWidget> {
+  @override
+  Widget build(BuildContext context) {
+    final pillar = Provider.of<Pillar>(context);
+    return Stack(
+      children: [
+        InkWell(
+          onTap: () {
+            pillar.increaseArticleCount();
+          },
+          child: Image.asset('assets/images/${pillar.type.imageName}',
+              width: 110, height: 110),
+        ),
+        Positioned(
+          bottom: 2,
+          child: CircleAvatar(
+            backgroundColor: Colors.blue,
+            child: Text(pillar.articleCount.toString()),
+          ),
+        )
+      ],
+    );
+  }
+}
+```
