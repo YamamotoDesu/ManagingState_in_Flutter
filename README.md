@@ -151,3 +151,132 @@ class _TutorialWidgetState extends State<TutorialWidget> {
   }
 }
 ```
+
+------
+### Extend a Value Notifier
+
+lib/models/pillar.dart
+```dart
+class Pillar extends ValueNotifier<int>{
+  int get articleCount => value;
+  var active = true;
+  final PillarType type;
+
+  Pillar({required this.type, int articleCount = 10}) : super(articleCount); 
+
+  void increaseArticleCount({int by = 1}) {
+    value += by;
+  }
+}
+```
+
+lib/main.dart
+```dart
+class _ApplicationState extends State<Application> {
+  final pillarData = Pillar(type: PillarType.flutter, articleCount: 115);
+
+  @override
+  void dispose() {
+    pillarData.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Tutorial Tracker',
+      theme: ThemeData(primarySwatch: Colors.green),
+      home: Scaffold(
+        appBar: AppBar(
+          title: const Text('Tutorial Tracker'),
+        ),
+        body: ValueListenableBuilder(
+          valueListenable: pillarData,
+          builder: (context, value, child) {
+            return TutorialsPage(
+              pillar: pillarData,
+            );
+          }
+        ),
+      ),
+    );
+  }
+}
+```
+
+lib/pages/tutorials_page.dart
+```dart
+class TutorialsPage extends StatefulWidget {
+  final Pillar pillar;
+  const TutorialsPage({
+    required this.pillar,
+    super.key,
+  });
+
+  @override
+  State<TutorialsPage> createState() => _TutorialsPageState();
+}
+
+class _TutorialsPageState extends State<TutorialsPage> {
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: <Widget>[
+        Center(
+          child: TutorialWidget(
+            pillar: widget.pillar,
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.only(top: 24.0),
+          child: Text(
+            'Total Tutorials: ${widget.pillar.articleCount}',
+            style: const TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
+          ),
+        )
+      ],
+    );
+  }
+}
+```
+
+lib/widgets/tutorial_widget.dart
+```dart
+class TutorialWidget extends StatefulWidget {
+  final Pillar pillar;
+
+  const TutorialWidget({
+    required this.pillar,
+    super.key,
+  });
+
+  @override
+  State<TutorialWidget> createState() => _TutorialWidgetState();
+}
+
+class _TutorialWidgetState extends State<TutorialWidget> {
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      children: [
+        InkWell(
+          onTap: () {
+            widget.pillar.increaseArticleCount();
+          },
+          child: Image.asset('assets/images/${widget.pillar.type.imageName}',
+              width: 110, height: 110),
+        ),
+        Positioned(
+          bottom: 2,
+          child: CircleAvatar(
+            backgroundColor: Colors.blue,
+            child: Text(widget.pillar.articleCount.toString()),
+          ),
+        )
+      ],
+    );
+  }
+}
+
+```
