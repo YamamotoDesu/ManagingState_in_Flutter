@@ -10,6 +10,8 @@ Each edition has its own branch, named `versions/[VERSION]`. The default branch 
 | --------------------------------------------------------------------------------------- |:-------:|:------------:|
 | [versions/2.0](https://github.com/raywenderlich/video-msf-materials/tree/versions/2.0) | 2.0     | 2022-09-22   |
 
+-----
+
 ### Understand State Management
 
 <img width="300" alt="image" src="https://github.com/YamamotoDesu/ManagingState_in_Flutter/assets/47273077/a982f158-67be-42ee-9c85-631aa5aedc89">
