@@ -280,3 +280,226 @@ class _TutorialWidgetState extends State<TutorialWidget> {
 }
 
 ```
+
+### Mutate the Inherited Widget
+
+lib/state/pillar_widget.dart
+```dart
+import 'package:flutter/material.dart';
+import '../models/pillar.dart';
+
+class PillarIhheritedWiget extends InheritedWidget {
+  final PillarState state;
+  final int articleCount;
+
+  const PillarIhheritedWiget(
+      {required this.articleCount, required this.state, super.key, required super.child});
+
+  static PillarState of(BuildContext context) {
+    final PillarIhheritedWiget? result =
+        context.dependOnInheritedWidgetOfExactType<PillarIhheritedWiget>();
+    assert(result != null, 'No PillarWidget found in context');
+    return result!.state;
+  }
+
+  @override
+  bool updateShouldNotify(PillarIhheritedWiget old) => articleCount != old.articleCount;
+}
+
+class PillarSttatefulWidget extends StatefulWidget {
+  final Widget child;
+  final Pillar pillarData;
+  const PillarSttatefulWidget(
+      {required this.pillarData, required this.child, Key? key})
+      : super(key: key);
+
+  @override
+  State<PillarSttatefulWidget> createState() => PillarState();
+}
+
+class PillarState extends State<PillarSttatefulWidget> {
+
+  get articleCount => widget.pillarData.articleCount;
+  get imageName => widget.pillarData.type.imageName;
+
+  void increaseArticleCount({ int by = 1}) {
+    setState(() {
+      widget.pillarData.increaseArticleCount(by: by);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return PillarIhheritedWiget(
+      articleCount: articleCount,
+      state: this,
+      child: widget.child,
+    );
+  }
+}
+```
+
+lib/models/pillar.dart
+```dart
+import 'package:flutter/material.dart';
+
+class Pillar {
+  var _articleCount = 0;
+  int get articleCount => _articleCount;
+  var active = true;
+  final PillarType type;
+
+  Pillar({required this.type, int articleCount = 10}) {
+    _articleCount = articleCount;
+  } 
+
+  void increaseArticleCount({int by = 1}) {
+    _articleCount += by;
+  }
+}
+
+enum PillarType {
+  flutter('flutter.png', Colors.blue),
+  android('android.png', Colors.green),
+  ios('ios.png', Colors.orange);
+
+  final String imageName;
+  final Color backgroundColor;
+
+  const PillarType(this.imageName, this.backgroundColor);
+}
+
+```
+
+lib/main.dart
+```dart
+import 'package:flutter/material.dart';
+import 'pages/tutorials_page.dart';
+import 'models/pillar.dart';
+import 'state/pillar_widget.dart';
+
+void main() {
+  runApp(const Application());
+}
+
+class Application extends StatefulWidget {
+  const Application({super.key});
+
+  @override
+  State<Application> createState() => _ApplicationState();
+}
+
+class _ApplicationState extends State<Application> {
+  final pillarData = Pillar(type: PillarType.flutter, articleCount: 115);
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Tutorial Tracker',
+      theme: ThemeData(primarySwatch: Colors.green),
+      home: Scaffold(
+        appBar: AppBar(
+          title: const Text('Tutorial Tracker'),
+        ),
+        body: PillarSttatefulWidget(
+            pillarData: pillarData,
+            child: const TutorialsPage(),
+          ),
+      ),
+    );
+  }
+}
+```
+
+lib/pages/tutorials_page.dart
+```dart
+import 'package:flutter/material.dart';
+import '../widgets/tutorial_widget.dart';
+import '../state/pillar_widget.dart';
+
+class TutorialsPage extends StatefulWidget {
+  const TutorialsPage({
+    super.key,
+  });
+
+  @override
+  State<TutorialsPage> createState() => _TutorialsPageState();
+}
+
+class _TutorialsPageState extends State<TutorialsPage> {
+  @override
+  Widget build(BuildContext context) {
+    final pillar = PillarIhheritedWiget.of(context);
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: <Widget>[
+        const Center(
+          child: TutorialWidget()),
+        Padding(
+          padding: const EdgeInsets.only(top: 24.0),
+          child: Text(
+            'Total Tutorials: ${pillar.articleCount}',
+            style: const TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
+          ),
+        )
+      ],
+    );
+  }
+}
+```
+
+lib/state/pillar_widget.dart
+```dart
+import 'package:flutter/material.dart';
+import '../models/pillar.dart';
+
+class PillarIhheritedWiget extends InheritedWidget {
+  final PillarState state;
+  final int articleCount;
+
+  const PillarIhheritedWiget(
+      {required this.articleCount, required this.state, super.key, required super.child});
+
+  static PillarState of(BuildContext context) {
+    final PillarIhheritedWiget? result =
+        context.dependOnInheritedWidgetOfExactType<PillarIhheritedWiget>();
+    assert(result != null, 'No PillarWidget found in context');
+    return result!.state;
+  }
+
+  @override
+  bool updateShouldNotify(PillarIhheritedWiget old) => articleCount != old.articleCount;
+}
+
+class PillarSttatefulWidget extends StatefulWidget {
+  final Widget child;
+  final Pillar pillarData;
+  const PillarSttatefulWidget(
+      {required this.pillarData, required this.child, Key? key})
+      : super(key: key);
+
+  @override
+  State<PillarSttatefulWidget> createState() => PillarState();
+}
+
+class PillarState extends State<PillarSttatefulWidget> {
+
+  get articleCount => widget.pillarData.articleCount;
+  get imageName => widget.pillarData.type.imageName;
+
+  void increaseArticleCount({ int by = 1}) {
+    setState(() {
+      widget.pillarData.increaseArticleCount(by: by);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return PillarIhheritedWiget(
+      articleCount: articleCount,
+      state: this,
+      child: widget.child,
+    );
+  }
+}
+```
