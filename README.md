@@ -663,3 +663,148 @@ class _TutorialWidgetState extends State<TutorialWidget> {
                 pillar.increaseArticleCount();
 ```
 
+----
+
+## Use Multiple Providers
+<img width="300" alt="スクリーンショット 2023-06-05 21 37 53" src="https://github.com/YamamotoDesu/ManagingState_in_Flutter/assets/47273077/fe8d67aa-d860-4caa-9ca2-93857852e37e">
+
+lib/models/domain.dart
+```dart
+import 'package:flutter/material.dart';
+import 'pillar.dart';
+
+abstract class Domain extends ChangeNotifier {
+  final Pillar pillar;
+  Domain(this.pillar);
+
+  void increaseArticleCount({int by = 1}) {
+    pillar.increaseArticleCount(by: by);
+    notifyListeners();
+  }
+
+  int get articleCount => pillar.articleCount;
+  String get imageName => pillar.type.imageName;
+  Color get backgroundColor => pillar.type.backgroundColor;
+}
+
+class Flutter extends Domain {
+  Flutter(super.pillar);
+}
+
+class Android extends Domain {
+  Android(super.pillar);
+}
+
+class Swift extends Domain {
+  Swift(super.pillar);
+}
+```
+
+lib/models/pillar.dart
+```dart
+import 'package:flutter/material.dart';
+
+class Pillar extends ChangeNotifier {
+  var _articleCount = 0;
+  int get articleCount => _articleCount;
+  var active = true;
+  final PillarType type;
+
+  Pillar({required this.type, int articleCount = 10}) {
+    _articleCount = articleCount;
+  } 
+
+  void increaseArticleCount({int by = 1}) {
+    _articleCount += by;
+    notifyListeners();
+  }
+}
+
+enum PillarType {
+  flutter('flutter.png', Colors.blue),
+  android('android.png', Colors.green),
+  ios('ios.png', Colors.orange);
+
+  final String imageName;
+  final Color backgroundColor;
+
+  const PillarType(this.imageName, this.backgroundColor);
+}
+```
+
+lib/state/pillar_widget.dart
+```dart
+class PillarIhheritedWiget extends InheritedWidget {
+  final PillarState state;
+  final int articleCount;
+
+  const PillarIhheritedWiget(
+      {required this.articleCount, required this.state, super.key, required super.child});
+
+  static PillarState of(BuildContext context) {
+    final PillarIhheritedWiget? result =
+        context.dependOnInheritedWidgetOfExactType<PillarIhheritedWiget>();
+    assert(result != null, 'No PillarWidget found in context');
+    return result!.state;
+  }
+
+  @override
+  bool updateShouldNotify(PillarIhheritedWiget old) => articleCount != old.articleCount;
+}
+
+class PillarSttatefulWidget extends StatefulWidget {
+  final Widget child;
+  final Pillar pillarData;
+  const PillarSttatefulWidget(
+      {required this.pillarData, required this.child, Key? key})
+      : super(key: key);
+
+  @override
+  State<PillarSttatefulWidget> createState() => PillarState();
+}
+
+class PillarState extends State<PillarSttatefulWidget> {
+
+  get articleCount => widget.pillarData.articleCount;
+  get imageName => widget.pillarData.type.imageName;
+
+  void increaseArticleCount({ int by = 1}) {
+    setState(() {
+      widget.pillarData.increaseArticleCount(by: by);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return PillarIhheritedWiget(
+      articleCount: articleCount,
+      state: this,
+      child: widget.child,
+    );
+  }
+}
+```
+
+lib/pages/tutorials_page.dart
+```dart
+class _TutorialsPageState extends State<TutorialsPage> {
+  @override
+  Widget build(BuildContext context) {
+    return Consumer3<Flutter, Android, Swift>(
+      builder: (_, flutter, android, swift, __) {
+        final totalArticles =
+          android.articleCount + flutter.articleCount + swift.articleCount;
+        return Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: <Widget>[
+         Center(child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              TutorialWidget(domain: flutter),
+              TutorialWidget(domain: android),
+              TutorialWidget(domain: swift),
+            ],
+          )),
+```
+
+
